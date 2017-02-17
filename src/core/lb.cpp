@@ -1116,7 +1116,7 @@ int lb_lbfluid_load_checkpoint(char* filename, int binary) {
         if (!cpfile) {
             return ES_ERROR;
         }
-        double pop[19];
+        double pop[19*LB_COMPONENTS];
         int ind[3];
 
         int gridsize[3];
@@ -1133,13 +1133,24 @@ int lb_lbfluid_load_checkpoint(char* filename, int binary) {
                     ind[1]=j;
                     ind[2]=k;
                     if (!binary) {
+#ifdef SHANCHEN
+                        if (fscanf(cpfile, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \n", &pop[0],&pop[1],&pop[2],&pop[3],&pop[4],&pop[5],&pop[6],&pop[7],&pop[8],&pop[9],&pop[10],&pop[11],&pop[12],&pop[13],&pop[14],&pop[15],&pop[16],&pop[17],&pop[18],&pop[19],&pop[20],&pop[21],&pop[22],&pop[23],&pop[24],&pop[25],&pop[26],&pop[27],&pop[28],&pop[29],&pop[30],&pop[31],&pop[32],&pop[33],&pop[34],&pop[35],&pop[36],&pop[37]) != 38) {
+                            return ES_ERROR;
+                    }
+#else
                         if (fscanf(cpfile, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \n", &pop[0],&pop[1],&pop[2],&pop[3],&pop[4],&pop[5],&pop[6],&pop[7],&pop[8],&pop[9],&pop[10],&pop[11],&pop[12],&pop[13],&pop[14],&pop[15],&pop[16],&pop[17],&pop[18]) != 19) {
                             return ES_ERROR;
-                        }
+                    }
+#endif
                     }
                     else {
+#ifdef SHANCHEN
+                        if (fread(pop, sizeof(double), 38, cpfile) != 38)
+                            return ES_ERROR;
+#else
                         if (fread(pop, sizeof(double), 19, cpfile) != 19)
                             return ES_ERROR;
+#endif
                     }
                     lb_lbnode_set_pop(ind, pop);
                 }
