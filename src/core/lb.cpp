@@ -1150,7 +1150,6 @@ int lb_lbfluid_load_checkpoint(char* filename, int binary) {
         gridsize[1] = box_l[1] / lbpar.agrid;
         gridsize[2] = box_l[2] / lbpar.agrid;
 
-	printf("%d\n",__LINE__); fflush(stdout);
 	int linesread=0;
         for (int i=0; i < gridsize[0]; i++) {
             for (int j=0; j < gridsize[1]; j++) {
@@ -1185,7 +1184,6 @@ int lb_lbfluid_load_checkpoint(char* filename, int binary) {
                 }
             }
         }
-	printf("%d\n",__LINE__); fflush(stdout);
         fclose(cpfile);
 //  lbpar.resend_halo=1;
 //  mpi_bcast_lb_params(0);
