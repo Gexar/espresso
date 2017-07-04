@@ -1060,6 +1060,30 @@ int lb_lbfluid_save_checkpoint(char* filename, int binary) {
 }
 
 
+int lb_lbfluid_rescale(double factor) { 
+	int i,ret=0,ind[3],n;
+        double pop[19*LB_COMPONENTS];
+        int gridsize[3];
+        gridsize[0] = box_l[0] / lbpar.agrid;
+        gridsize[1] = box_l[1] / lbpar.agrid;
+        gridsize[2] = box_l[2] / lbpar.agrid;
+
+        for (int i=0; i < gridsize[0]; i++) {
+            for (int j=0; j < gridsize[1]; j++) {
+                for (int k=0; k < gridsize[2]; k++) {
+                    ind[0]=i;
+                    ind[1]=j;
+                    ind[2]=k;
+		    lb_lbnode_get_pop(ind, pop);
+		    for(n=0;n< 19 * LB_COMPONENTS; n++) 
+			pop[n]*=factor;
+        	    ret+=lb_lbnode_set_pop(ind, pop);
+		}
+	    }
+        }
+	return !!ret;
+}
+
 int lb_lbfluid_load_checkpoint(char* filename, int binary) {
     if(lattice_switch & LATTICE_LB_GPU) {
 #ifdef LB_GPU
@@ -1126,6 +1150,8 @@ int lb_lbfluid_load_checkpoint(char* filename, int binary) {
         gridsize[1] = box_l[1] / lbpar.agrid;
         gridsize[2] = box_l[2] / lbpar.agrid;
 
+	printf("%d\n",__LINE__); fflush(stdout);
+	int linesread=0;
         for (int i=0; i < gridsize[0]; i++) {
             for (int j=0; j < gridsize[1]; j++) {
                 for (int k=0; k < gridsize[2]; k++) {
@@ -1134,7 +1160,10 @@ int lb_lbfluid_load_checkpoint(char* filename, int binary) {
                     ind[2]=k;
                     if (!binary) {
 #ifdef SHANCHEN
-                        if (fscanf(cpfile, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \n", &pop[0],&pop[1],&pop[2],&pop[3],&pop[4],&pop[5],&pop[6],&pop[7],&pop[8],&pop[9],&pop[10],&pop[11],&pop[12],&pop[13],&pop[14],&pop[15],&pop[16],&pop[17],&pop[18],&pop[19],&pop[20],&pop[21],&pop[22],&pop[23],&pop[24],&pop[25],&pop[26],&pop[27],&pop[28],&pop[29],&pop[30],&pop[31],&pop[32],&pop[33],&pop[34],&pop[35],&pop[36],&pop[37]) != 38) {
+		        linesread++;
+                        int a=fscanf(cpfile, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \n", &pop[0],&pop[1],&pop[2],&pop[3],&pop[4],&pop[5],&pop[6],&pop[7],&pop[8],&pop[9],&pop[10],&pop[11],&pop[12],&pop[13],&pop[14],&pop[15],&pop[16],&pop[17],&pop[18],&pop[19],&pop[20],&pop[21],&pop[22],&pop[23],&pop[24],&pop[25],&pop[26],&pop[27],&pop[28],&pop[29],&pop[30],&pop[31],&pop[32],&pop[33],&pop[34],&pop[35],&pop[36],&pop[37]);
+			if (a != 38) {
+			    printf("%d -> %d %d %d ; %d %d ; %d %d %d ;; %d\n",a,i,j,k,EOF,__LINE__,gridsize[0],gridsize[1],gridsize[2],linesread); fflush(stdout);
                             return ES_ERROR;
                     }
 #else
@@ -1156,6 +1185,7 @@ int lb_lbfluid_load_checkpoint(char* filename, int binary) {
                 }
             }
         }
+	printf("%d\n",__LINE__); fflush(stdout);
         fclose(cpfile);
 //  lbpar.resend_halo=1;
 //  mpi_bcast_lb_params(0);

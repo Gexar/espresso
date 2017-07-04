@@ -601,6 +601,7 @@ int lb_lbnode_set_u(int* ind, double* u);
 int lb_lbnode_set_pi(int* ind, double* pi);
 int lb_lbnode_set_pi_neq(int* ind, double* pi_neq);
 int lb_lbnode_set_pop(int* ind, double* pop);
+int lb_lbfluid_rescale(double factor);
 
 /** calculates the fluid velocity at a given position of the 
  * lattice. Note that it can lead to undefined behaviour if the

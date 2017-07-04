@@ -249,6 +249,33 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
     lbfluid_tcl_print_usage(interp);
     return TCL_ERROR;
   }
+  else if (ARG0_IS_S_EXACT("rescale")) 
+  {
+	double floatarg;
+	printf("starting rescaling\n");
+	if ( argc < 2 || !ARG1_IS_D(floatarg) ) 
+	{
+	  Tcl_AppendResult(interp, "rescale requires 1 argument", (char *)NULL);
+	  return TCL_ERROR;
+	}
+	else if (floatarg <= 0) 
+	{
+	  Tcl_AppendResult(interp, "scaling must be positive", (char *)NULL);
+	  return TCL_ERROR;
+	}
+	else 
+	{
+	  if ( lb_lbfluid_rescale(floatarg) == 0 ) 
+	  {
+	    argc-=2; argv+=2;
+	  }  else  {
+	    Tcl_AppendResult(interp, "General Error on lbfluid rescale .", (char *)NULL);
+	    return TCL_ERROR;
+	  }
+	}
+	printf("end rescaling\n");
+  }
+
   else if (ARG0_IS_S_EXACT("init")) 
   {
     lbfluid_tcl_print_usage(interp);
