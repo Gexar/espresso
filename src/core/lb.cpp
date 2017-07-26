@@ -3398,16 +3398,20 @@ inline void lb_viscous_coupling(Particle *p, double force[3]) {
 #define set_coupling_and_densities(ind,rho)\
 {\
                     boundary_ind = lbfields[ind].boundary ;\
-                    coupling[0]=lbpar.coupling[0];\
-                    coupling[1]=lbpar.coupling[1];\
-                    coupling[2]=lbpar.coupling[2];\
-                    coupling[3]=lbpar.coupling[3];\
+                     coupling[0]=lbpar.coupling[0];\
+                     coupling[1]=lbpar.coupling[1];\
+                     coupling[2]=lbpar.coupling[2];\
+                     coupling[3]=lbpar.coupling[3];\
                     if (boundary_ind) {\
 			     double alpha = lb_boundaries[boundary_ind-1].sc_coupling[0];\
 			     double beta  = lb_boundaries[boundary_ind-1].sc_coupling[1];\
-			     tmprho[0]=alpha * rho[0] + (1-alpha)*rho[1];\
-			     tmprho[1]= beta * rho[1] + (1-beta) *rho[0];\
+			     tmprho[0]= alpha * rho[0] ;\
+			     tmprho[1]= beta  * rho[1] ;\ 
 		    } else {\
+                    	 coupling[0]=lbpar.coupling[0];\
+                    	 coupling[1]=lbpar.coupling[1];\
+                    	 coupling[2]=lbpar.coupling[2];\
+                    	 coupling[3]=lbpar.coupling[3];\
 			 tmprho[0]=lbfields[ind].rho[0];\
 			 tmprho[1]=lbfields[ind].rho[1];\
                     }\
