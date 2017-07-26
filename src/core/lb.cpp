@@ -3395,26 +3395,25 @@ inline void lb_viscous_coupling(Particle *p, double force[3]) {
 
 
 #ifdef LB_BOUNDARIES
-#define set_coupling_and_densities(ind)\
+#define set_coupling_and_densities(ind,rho)\
 {\
                     boundary_ind = lbfields[ind].boundary ;\
+                    coupling[0]=lbpar.coupling[0];\
+                    coupling[1]=lbpar.coupling[1];\
+                    coupling[2]=lbpar.coupling[2];\
+                    coupling[3]=lbpar.coupling[3];\
                     if (boundary_ind) {\
-	    	             coupling[1]= lb_boundaries[boundary_ind-1].sc_coupling[0];\
-	    	             coupling[2]= lb_boundaries[boundary_ind-1].sc_coupling[1];\
-		             coupling[0]=coupling[3]=0.0;\
-			     tmprho[0]=1;\
-			     tmprho[1]=1;\
+			     double alpha = lb_boundaries[boundary_ind-1].sc_coupling[0];\
+			     double beta  = lb_boundaries[boundary_ind-1].sc_coupling[1];\
+			     tmprho[0]=alpha * rho[0] + (1-alpha)*rho[1];\
+			     tmprho[1]= beta * rho[1] + (1-beta) *rho[0];\
 		    } else {\
-                         coupling[0]=lbpar.coupling[0];\
-                         coupling[1]=lbpar.coupling[1];\
-                         coupling[2]=lbpar.coupling[2];\
-                         coupling[3]=lbpar.coupling[3];\
 			 tmprho[0]=lbfields[ind].rho[0];\
 			 tmprho[1]=lbfields[ind].rho[1];\
                     }\
 }
 #else 
-#define set_coupling_and_densities(ind)\
+#define set_coupling_and_densities(ind,rho)\
 {\
                     {\
                      coupling[0]=lbpar.coupling[0];\
@@ -3477,10 +3476,13 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			int ind;
 			int boundary_ind;
 			int boundary_index;
+			double rho[2];
+			rho[0] = lbfields[index].rho[0]; 
+			rho[1] = lbfields[index].rho[1]; 
 			for(int ii=0;ii<LB_COMPONENTS;ii++) f[ii][0]=f[ii][1]=f[ii][2]=0.0;
 
 			ind = index + dx;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] = tmprho[0]/18.; 
 			tmpn[0] = tmprho[1]/18.; 
 			for(int ii=0;ii<LB_COMPONENTS;ii++){
@@ -3488,7 +3490,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			   f[ii][0] -= tmpn[0] * coupling[1+LB_COMPONENTS*ii]; 
 			}
 			ind = index - dx;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] = -tmprho[0]/18.; 
 			tmpn[0] = -tmprho[1]/18.; 
 			for(int ii=0;ii<LB_COMPONENTS;ii++){
@@ -3496,7 +3498,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			   f[ii][0] -= tmpn[0] * coupling[1+LB_COMPONENTS*ii]; 
 			}
 			ind = index + dy;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[1] = tmprho[0]/18.; 
 			tmpn[1] = tmprho[1]/18.; 
 			for(int ii=0;ii<LB_COMPONENTS;ii++){
@@ -3505,7 +3507,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 			
 			ind = index - dy;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[1] = -tmprho[0]/18.; 
 			tmpn[1] = -tmprho[1]/18.; 
 			for(int ii=0;ii<LB_COMPONENTS;ii++){
@@ -3514,7 +3516,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index + dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[2] = tmprho[0]/18.; 
 			tmpn[2] = tmprho[1]/18.; 
 			for(int ii=0;ii<LB_COMPONENTS;ii++){
@@ -3523,7 +3525,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 			
 			ind = index - dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[2] = -tmprho[0]/18.; 
 			tmpn[2] = -tmprho[1]/18.; 
 			for(int ii=0;ii<LB_COMPONENTS;ii++){
@@ -3531,7 +3533,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			   f[ii][2] -= tmpn[2] * coupling[1+LB_COMPONENTS*ii]; 
 			}
 			ind	= index + dx + dy;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] =  tmprho[0]/36.; 
 			tmpp[1] =  tmprho[0]/36.; 
 			tmpn[0] = tmprho[1]/36.; 
@@ -3544,7 +3546,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index - dx - dy;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] = -tmprho[0]/36.; 
 			tmpp[1] = -tmprho[0]/36.; 
 			tmpn[0] = -tmprho[1]/36.; 
@@ -3557,7 +3559,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 			
 			ind = index + dx - dy;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] =  tmprho[0]/36.; 
 			tmpp[1] = -tmprho[0]/36.; 
 			tmpn[0] =  tmprho[1]/36.; 
@@ -3570,7 +3572,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index - dx + dy;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] = -tmprho[0]/36.; 
 			tmpp[1] =  tmprho[0]/36.; 
 			tmpn[0] = -tmprho[1]/36.; 
@@ -3583,7 +3585,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index + dx + dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] = tmprho[0]/36.; 
 			tmpp[2] = tmprho[0]/36.; 
 			tmpn[0] = tmprho[1]/36.; 
@@ -3596,7 +3598,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index + dx - dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] = tmprho[0]/36.; 
 			tmpp[2] =-tmprho[0]/36.; 
 			tmpn[0] = tmprho[1]/36.; 
@@ -3609,7 +3611,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 			
 			ind = index - dx + dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] = -tmprho[0]/36.; 
 			tmpp[2] =  tmprho[0]/36.; 
 			tmpn[0] = -tmprho[1]/36.; 
@@ -3622,7 +3624,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index - dx - dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[0] = -tmprho[0]/36.; 
 			tmpp[2] = -tmprho[0]/36.; 
 			tmpn[0] = -tmprho[1]/36.; 
@@ -3635,7 +3637,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index + dy + dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[1] = tmprho[0]/36.; 
 			tmpp[2] = tmprho[0]/36.; 
 			tmpn[1] = tmprho[1]/36.; 
@@ -3648,7 +3650,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index - dy - dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[1] = -tmprho[0]/36.; 
 			tmpp[2] = -tmprho[0]/36.; 
 			tmpn[1] = -tmprho[1]/36.; 
@@ -3661,7 +3663,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 
 			ind = index + dy - dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[1]  =  tmprho[0]/36.; 
 			tmpp[2]  = -tmprho[0]/36.; 
 			tmpn[1]  =  tmprho[1]/36.; 
@@ -3674,7 +3676,7 @@ void lattice_boltzmann_calc_shanchen_cpu(void){
 			}
 			
 			ind = index - dy + dz;
-			set_coupling_and_densities(ind);
+			set_coupling_and_densities(ind,rho);
 			tmpp[1] = -tmprho[0]/36.; 
 			tmpp[2] =  tmprho[0]/36.; 
 			tmpn[1] = -tmprho[1]/36.; 

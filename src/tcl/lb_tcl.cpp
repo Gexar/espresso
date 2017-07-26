@@ -206,10 +206,12 @@ int tclcommand_lbfluid(ClientData data, Tcl_Interp *interp, int argc, char **arg
 {
 #ifdef PARTIAL_PERIODIC
 #ifdef SHANCHEN
+#if defined (LB_GPU)
 	if(!PERIODIC(0) || !PERIODIC(1) || !PERIODIC(2)) { 
         	printf("ERROR: SHANCHEN does not support (yet) partial periodicity, please use [setmd periodic 1 1 1]\n");
 		errexit();
 	}
+#endif
 #endif
 #endif
 
